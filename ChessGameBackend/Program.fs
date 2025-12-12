@@ -1,4 +1,5 @@
 namespace ChessGameBackend
+
 #nowarn "20"
 open System
 open System.Collections.Generic
@@ -13,6 +14,7 @@ open Microsoft.Extensions.Configuration
 open Microsoft.Extensions.DependencyInjection
 open Microsoft.Extensions.Hosting
 open Microsoft.Extensions.Logging
+open ChessGameBackend.Services
 
 module Program =
     let exitCode = 0
@@ -23,6 +25,7 @@ module Program =
         let builder = WebApplication.CreateBuilder(args)
 
         builder.Services.AddControllers()
+        builder.Services.AddSingleton<IChessStateService, ChessStateService>()
 
         let app = builder.Build()
 

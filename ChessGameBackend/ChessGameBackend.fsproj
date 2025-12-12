@@ -5,8 +5,11 @@
   </PropertyGroup>
 
   <ItemGroup>
-    <Compile Include="WeatherForecast.fs" />
-    <Compile Include="Controllers/WeatherForecastController.fs" />
+    <Compile Include="Game.fs" />
+    <Compile Include="Move.fs" />
+    <Compile Include="ChessStateService.fs" />
+    <Compile Include="Controllers\GameController.fs" />
+    <Compile Include="Controllers\MoveController.fs" />
     <Compile Include="Program.fs" />
   </ItemGroup>
 
