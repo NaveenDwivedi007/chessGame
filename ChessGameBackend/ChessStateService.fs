@@ -1,65 +1,53 @@
 namespace ChessGameBackend.Services
 
 open System
-open ChessGameBackend.Move
-type Pieces = Pawn = 'p' | King ='K' | Queen = 'q'|Knight = 'k' | Rook = 'r' | Bishop = 'b'
-type Sides = White = 'l' | Black = 'd'
-type TBoard = ((string|null) list) list
+open ChessGameBackend.Game
 
 type GameRecord = {
-    id: string
-    board:TBoard
+    Id: string
+    Board: Board
 }
 
 type IChessStateService =
     abstract member ValidateMove: string -> bool
     abstract member GetAvailableMoves: unit -> string list
     abstract member GameInit: unit -> GameRecord
-    abstract member GetGameBoard: string -> TBoard option
+    abstract member GetGameBoard: string -> Board option
 
 
 type ChessStateService() =
-    let initialize_board () = 
-        let pawn_list = [0..7] |> List.map(fun _ -> Pieces.Pawn)
-        let empty_space = [0..7] |> List.map(fun _ -> null)
-        let piece_list = [for i in 0..7 do
-                                    if i = 0 || i = 7 then yield Pieces.Rook
-                                    if i=1 || i = 6 then yield Pieces.Knight
-                                    if i = 2 || i = 5 then yield Pieces.Bishop
-                                    if i = 4 then yield Pieces.King
-                                    if i = 3 then yield Pieces.Queen
-                                    ]
-        let make_piece (side:Sides,row: Pieces List) =row |> List.map(fun piece -> side.ToString()+"_"+piece.ToString())
-        let game_init_state = [0..7] |> List.map(function 
-                                                        | row when row = 0 -> make_piece(Sides.Black, piece_list)
-                                                        | row when row = 1 -> make_piece(Sides.Black, pawn_list)
-                                                        | row when row = 6 -> make_piece(Sides.White, pawn_list)
-                                                        | row when row = 7 -> make_piece(Sides.White, piece_list)
-                                                        | row -> empty_space
-                                                        )
-                                                          
-        printfn "len %i" (game_init_state.Length)
-        game_init_state
+    let square side piece : option<Square>= Some { Piece = piece; Side = side }
 
-    let random_id_gen () = Guid.NewGuid().ToString()
+    let initializeBoard () =
+        let backRank = [ Rook; Knight; Bishop; Queen; King; Bishop; Knight; Rook ]
+        let backRankFor side = backRank |> List.map (square side)
+        let pawnRankFor side = List.replicate 8 (square side Pawn)
+        let emptyRow : option<Square> list = List.replicate 8 None
 
-    let mutable Game_Record = Map.empty<string,TBoard>
+        [
+            backRankFor Black
+            pawnRankFor Black
+            emptyRow; emptyRow; emptyRow; emptyRow
+            pawnRankFor White
+            backRankFor White
+        ]
+
+    let generateId () = Guid.NewGuid().ToString()
+
+    let mutable gameRecords = Map.empty<string, Board>
 
     interface IChessStateService with
-        member _.ValidateMove(move: string) =
+        member _.ValidateMove(_move) =
             true
-            
+
         member _.GetAvailableMoves() =
             []
-        member _.GameInit() = 
-            let board = initialize_board()
-            let id = random_id_gen()
-            Game_Record <- Game_Record |> Map.add id board
-            {
-                id=id
-                board = board
-            }
 
-        member _.GetGameBoard(move: string) =
-            let game_state = Game_Record.TryFind(move)
-            game_state
+        member _.GameInit() =
+            let board = initializeBoard()
+            let id = generateId()
+            gameRecords <- gameRecords |> Map.add id board
+            { Id = id; Board = board }
+
+        member _.GetGameBoard(id) =
+            gameRecords.TryFind(id)

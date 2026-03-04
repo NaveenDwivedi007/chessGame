@@ -1,7 +1,5 @@
 ﻿namespace ChessGameBackend.Move
 
-open System
-
 type TCoordinate = 
     {
         x:int

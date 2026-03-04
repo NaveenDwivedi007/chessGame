@@ -1,8 +1,12 @@
 ﻿namespace ChessGameBackend.Game
 
-open System
+type Piece = Pawn | King | Queen | Knight | Rook | Bishop
+type Side = White | Black
+
+type Square = { Piece: Piece; Side: Side }
+type Board = option<Square> list list
 
 type GameBoard = {
-    board : ((string|null) List) List
-    id:string
-    }
+    Board: Board
+    Id: string
+}
