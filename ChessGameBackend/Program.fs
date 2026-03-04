@@ -26,8 +26,17 @@ module Program =
 
         builder.Services.AddControllers()
         builder.Services.AddSingleton<IChessStateService, ChessStateService>()
+        builder.Services.AddCors(fun options ->
+            options.AddDefaultPolicy(fun builder ->
+                builder.AllowAnyOrigin()
+                       .AllowAnyMethod()
+                       .AllowAnyHeader() |> ignore
+            )
+        )
 
         let app = builder.Build()
+
+        app.UseCors() |> ignore
 
         app.UseHttpsRedirection()
 

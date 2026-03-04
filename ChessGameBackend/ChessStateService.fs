@@ -15,7 +15,7 @@ type IChessStateService =
     abstract member ValidateMove: string -> bool
     abstract member GetAvailableMoves: unit -> string list
     abstract member GameInit: unit -> GameRecord
-    abstract member GetGameBoard: string -> TBoard
+    abstract member GetGameBoard: string -> TBoard option
 
 
 type ChessStateService() =
@@ -23,12 +23,12 @@ type ChessStateService() =
         let pawn_list = [0..7] |> List.map(fun _ -> Pieces.Pawn)
         let empty_space = [0..7] |> List.map(fun _ -> null)
         let piece_list = [for i in 0..7 do
-                            if i = 0 || i = 7 then yield Pieces.Rook
-                            if i=1 || i = 6 then yield Pieces.Knight
-                            if i = 2 || i = 5 then yield Pieces.Bishop
-                            if i = 4 then yield Pieces.Knight
-                            if i = 3 then yield Pieces.Queen
-                            ]
+                                    if i = 0 || i = 7 then yield Pieces.Rook
+                                    if i=1 || i = 6 then yield Pieces.Knight
+                                    if i = 2 || i = 5 then yield Pieces.Bishop
+                                    if i = 4 then yield Pieces.King
+                                    if i = 3 then yield Pieces.Queen
+                                    ]
         let make_piece (side:Sides,row: Pieces List) =row |> List.map(fun piece -> side.ToString()+"_"+piece.ToString())
         let game_init_state = [0..7] |> List.map(function 
                                                         | row when row = 0 -> make_piece(Sides.Black, piece_list)
@@ -61,4 +61,5 @@ type ChessStateService() =
             }
 
         member _.GetGameBoard(move: string) =
-            initialize_board()
+            let game_state = Game_Record.TryFind(move)
+            game_state

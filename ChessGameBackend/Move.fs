@@ -2,14 +2,16 @@
 
 open System
 
+type TCoordinate = 
+    {
+        x:int
+        y:int
+    }
 
-
-type WeatherForecast1 =
-    { 
-      TemperatureC: int
-      Summary: string
-      id: int
-      }
-
-    member this.TemperatureF =
-        32.0 + (float this.TemperatureC / 0.5556)
+type TPieceMove = 
+    {
+        gameId:string
+        pieceName:string
+        moveForm:TCoordinate
+        moveTo:TCoordinate
+    }
