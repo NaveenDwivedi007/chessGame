@@ -1,9 +1,5 @@
 ﻿namespace ChessGameBackend.MoveControllers
 
-open System
-open System.Collections.Generic
-open System.Linq
-open System.Threading.Tasks
 open Microsoft.AspNetCore.Mvc
 open Microsoft.Extensions.Logging
 open ChessGameBackend.Move
@@ -11,24 +7,14 @@ open ChessGameBackend.Services
 
 [<ApiController>]
 [<Route("api/[controller]")>]
-type MoveController (logger : ILogger<MoveController>,stateService:IChessStateService) =
+type MoveController (logger : ILogger<MoveController>, stateService: IChessStateService) =
     inherit ControllerBase()
 
-    [<HttpGet>]
-    member _.Get() =
-        let rng = System.Random()
-        stateService.GameInit()
-
-    [<HttpPostAttribute>]
-    member _.Post(arg: TPieceMove) =
-        printfn "Post req : %A" arg
-        let game_state = stateService.GetGameBoard(arg.gameId)
-        let board_state = 
-            match game_state with 
-            | Some gameState-> gameState
-            | None -> failwith("")
-        
-        board_state
-
-        
-        
+    [<HttpPost>]
+    member this.Post(arg: TPieceMove) : IActionResult =
+        logger.LogInformation("Move request: {Move}", arg)
+        match stateService.MakeMove arg.gameId arg.moveForm arg.moveTo with
+        | Ok response ->
+            this.Ok(response) :> IActionResult
+        | Error msg ->
+            this.BadRequest({| error = msg |}) :> IActionResult

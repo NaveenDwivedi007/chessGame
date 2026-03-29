@@ -8,7 +8,15 @@
     <Compile Include="Game.fs" />
     <Compile Include="Move.fs" />
     <Compile Include="Utils.fs" />
-    <Compile Include="pawn.fs" />
+    <Compile Include="Pieces\IPieceMovement.fs" />
+    <Compile Include="Pieces\pawn.fs" />
+    <Compile Include="Pieces\Knight.fs" />
+    <Compile Include="Pieces\Bishop.fs" />
+    <Compile Include="Pieces\Rook.fs" />
+    <Compile Include="Pieces\Queen.fs" />
+    <Compile Include="Pieces\King.fs" />
+    <Compile Include="Pieces\CheckValidator.fs" />
+    <Compile Include="Pieces\MoveDispatcher.fs" />
     <Compile Include="ChessStateService.fs" />
     <Compile Include="Controllers\GameController.fs" />
     <Compile Include="Controllers\MoveController.fs" />
