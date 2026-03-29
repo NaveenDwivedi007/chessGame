@@ -1,0 +1,48 @@
+namespace ChessGameBackend
+
+#nowarn "20"
+open System
+open System.Collections.Generic
+open System.IO
+open System.Linq
+open System.Threading.Tasks
+open Microsoft.AspNetCore
+open Microsoft.AspNetCore.Builder
+open Microsoft.AspNetCore.Hosting
+open Microsoft.AspNetCore.HttpsPolicy
+open Microsoft.Extensions.Configuration
+open Microsoft.Extensions.DependencyInjection
+open Microsoft.Extensions.Hosting
+open Microsoft.Extensions.Logging
+open ChessGameBackend.Services
+
+module Program =
+    let exitCode = 0
+
+    [<EntryPoint>]
+    let main args =
+
+        let builder = WebApplication.CreateBuilder(args)
+
+        builder.Services.AddControllers()
+        builder.Services.AddSingleton<IChessStateService, ChessStateService>()
+        builder.Services.AddCors(fun options ->
+            options.AddDefaultPolicy(fun builder ->
+                builder.AllowAnyOrigin()
+                       .AllowAnyMethod()
+                       .AllowAnyHeader() |> ignore
+            )
+        )
+
+        let app = builder.Build()
+
+        app.UseCors() |> ignore
+
+        app.UseHttpsRedirection()
+
+        app.UseAuthorization()
+        app.MapControllers()
+
+        app.Run()
+
+        exitCode
