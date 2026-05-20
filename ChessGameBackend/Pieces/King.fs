@@ -109,7 +109,7 @@ type KingMovement() =
         member this.IsValidMove (board: Board) (from: TCoordinate) (target: TCoordinate) (side: Side) (history: MoveRecord list) =
             (this :> IPieceMovement).GetValidMoves board from side history |> List.contains target
 
-        member this.ExecuteMove (board: Board) (from: TCoordinate) (target: TCoordinate) (side: Side) (history: MoveRecord list) =
+        member this.ExecuteMove (board: Board) (from: TCoordinate) (target: TCoordinate) (side: Side) (history: MoveRecord list) (_promotionPiece: Piece option) =
             if not ((this :> IPieceMovement).IsValidMove board from target side history) then None
             else
                 let piece = getPieceAt board from
