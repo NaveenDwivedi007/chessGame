@@ -14,6 +14,8 @@ open Microsoft.Extensions.Configuration
 open Microsoft.Extensions.DependencyInjection
 open Microsoft.Extensions.Hosting
 open Microsoft.Extensions.Logging
+open System.Text.Json
+open System.Text.Json.Serialization
 open ChessGameBackend.Services
 
 module Program =
@@ -25,6 +27,9 @@ module Program =
         let builder = WebApplication.CreateBuilder(args)
 
         builder.Services.AddControllers()
+            .AddJsonOptions(fun opts ->
+                opts.JsonSerializerOptions.Converters.Add(JsonFSharpConverter())
+            )
         builder.Services.AddSingleton<IChessStateService, ChessStateService>()
         builder.Services.AddCors(fun options ->
             options.AddDefaultPolicy(fun builder ->
@@ -38,7 +43,7 @@ module Program =
 
         app.UseCors() |> ignore
 
-        app.UseHttpsRedirection()
+        // app.UseHttpsRedirection()
 
         app.UseAuthorization()
         app.MapControllers()

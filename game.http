@@ -1,0 +1,194 @@
+@debugHttp = http://localhost:5192
+@debugHttps = https://localhost:8080
+
+# Debug mode: choose one
+@baseUrl = {{debugHttp}}
+
+@mainGameId = REPLACE_WITH_MAIN_GAME_ID
+@drawGameId = REPLACE_WITH_DRAW_GAME_ID
+@resignGameId = REPLACE_WITH_RESIGN_GAME_ID
+
+###
+# Scenario A: main gameplay flow
+
+###
+# Start a new game
+# @name startMainGame
+GET {{baseUrl}}/api/game/start-game
+Accept: application/json
+
+> {%
+client.test("start game returns 200", function () {
+	client.assert(response.status === 200, "Expected HTTP 200");
+});
+const id = response.body.id ?? response.body.Id;
+client.test("start game returns id", function () {
+	client.assert(!!id, "Expected response id");
+});
+if (id) client.global.set("mainGameId", id);
+%}
+
+###
+# Get game state by id
+GET {{baseUrl}}/api/game/{{mainGameId}}
+Accept: application/json
+
+> {%
+client.test("get state returns 200", function () {
+	client.assert(response.status === 200, "Expected HTTP 200");
+});
+%}
+
+###
+# Get move history
+GET {{baseUrl}}/api/game/{{mainGameId}}/history
+Accept: application/json
+
+> {%
+client.test("history returns 200", function () {
+	client.assert(response.status === 200, "Expected HTTP 200");
+});
+%}
+
+###
+# Get valid moves for a piece at (x,y), coordinates are 0..7.
+GET {{baseUrl}}/api/game/{{mainGameId}}/valid-moves?x=0&y=6
+Accept: application/json
+
+> {%
+client.test("valid moves returns 200", function () {
+	client.assert(response.status === 200, "Expected HTTP 200");
+});
+%}
+
+###
+# Submit a normal move
+POST {{baseUrl}}/api/move
+Content-Type: application/json
+Accept: application/json
+
+{
+	"gameId": "{{mainGameId}}",
+	"pieceName": "Pawn",
+	"moveForm": {
+		"x": 0,
+		"y": 6
+	},
+	"moveTo": {
+		"x": 0,
+		"y": 5
+	},
+	"promotionPiece": null
+}
+
+> {%
+client.test("move returns expected status", function () {
+	client.assert([200, 400, 409].includes(response.status), "Expected 200, 400, or 409");
+});
+%}
+
+###
+# Promotion move example (expected to fail unless board is promotion-ready)
+POST {{baseUrl}}/api/move
+Content-Type: application/json
+Accept: application/json
+
+{
+	"gameId": "{{mainGameId}}",
+	"pieceName": "Pawn",
+	"moveForm": {
+		"x": 0,
+		"y": 1
+	},
+	"moveTo": {
+		"x": 0,
+		"y": 0
+	},
+	"promotionPiece": "queen"
+}
+
+> {%
+client.test("promotion example returns expected status", function () {
+	client.assert([200, 400, 409].includes(response.status), "Expected 200, 400, or 409");
+});
+%}
+
+###
+# Scenario B: draw flow on a fresh game
+
+###
+# @name startDrawGame
+GET {{baseUrl}}/api/game/start-game
+Accept: application/json
+
+> {%
+const id = response.body.id ?? response.body.Id;
+client.test("draw scenario game created", function () {
+	client.assert(response.status === 200 && !!id, "Expected HTTP 200 with id");
+});
+if (id) client.global.set("drawGameId", id);
+%}
+
+###
+# Offer draw
+POST {{baseUrl}}/api/game/{{drawGameId}}/draw-offer
+Content-Type: application/json
+Accept: application/json
+
+{
+	"side": "white"
+}
+
+> {%
+client.test("draw offer returns 200", function () {
+	client.assert(response.status === 200, "Expected HTTP 200");
+});
+%}
+
+###
+# Accept draw (must be opposite side)
+POST {{baseUrl}}/api/game/{{drawGameId}}/accept-draw
+Content-Type: application/json
+Accept: application/json
+
+{
+	"side": "black"
+}
+
+> {%
+client.test("accept draw returns 200", function () {
+	client.assert(response.status === 200, "Expected HTTP 200");
+});
+%}
+
+###
+# Scenario C: resign flow on a fresh game
+
+###
+# @name startResignGame
+GET {{baseUrl}}/api/game/start-game
+Accept: application/json
+
+> {%
+const id = response.body.id ?? response.body.Id;
+client.test("resign scenario game created", function () {
+	client.assert(response.status === 200 && !!id, "Expected HTTP 200 with id");
+});
+if (id) client.global.set("resignGameId", id);
+%}
+
+###
+# Resign game
+POST {{baseUrl}}/api/game/{{resignGameId}}/resign
+Content-Type: application/json
+Accept: application/json
+
+{
+	"side": "white"
+}
+
+> {%
+client.test("resign returns 200", function () {
+	client.assert(response.status === 200, "Expected HTTP 200");
+});
+%}
