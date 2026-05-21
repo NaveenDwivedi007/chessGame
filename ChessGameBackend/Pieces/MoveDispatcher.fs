@@ -19,7 +19,7 @@ type MoveResult =
     | NoPieceAtSource
     | WouldLeaveKingInCheck
 
-let tryExecuteMove (board: Board) (from: TCoordinate) (target: TCoordinate) (side: Side) (history: MoveRecord list) : MoveResult =
+let tryExecuteMove (board: Board) (from: TCoordinate) (target: TCoordinate) (side: Side) (history: MoveRecord list) (promotionPiece: Piece option) : MoveResult =
     match getPieceAt board from with
     | None -> NoPieceAtSource
     | Some sq when sq.Side <> side -> NoPieceAtSource
@@ -28,7 +28,7 @@ let tryExecuteMove (board: Board) (from: TCoordinate) (target: TCoordinate) (sid
         if not (handler.IsValidMove board from target side history) then
             InvalidMove
         else
-            match handler.ExecuteMove board from target side history with
+            match handler.ExecuteMove board from target side history promotionPiece with
             | None -> InvalidMove
             | Some newBoard ->
                 if CheckValidator.isKingInCheck newBoard side history then

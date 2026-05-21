@@ -45,7 +45,7 @@ type PawnMovement() =
             let validMoves = (this :> IPieceMovement).GetValidMoves board from side history
             validMoves |> List.contains target
 
-        member this.ExecuteMove (board: Board) (from: TCoordinate) (target: TCoordinate) (side: Side) (history: MoveRecord list) =
+        member this.ExecuteMove (board: Board) (from: TCoordinate) (target: TCoordinate) (side: Side) (history: MoveRecord list) (promotionPiece: Piece option) =
             if not ((this :> IPieceMovement).IsValidMove board from target side history) then None
             else
                 let piece = getPieceAt board from
@@ -62,9 +62,10 @@ type PawnMovement() =
 
                 let newBoard = applyMove boardAfterCapture from target piece
 
-                // Promotion: default to Queen
+                // Promotion: use requested piece, defaulting to Queen
                 if target.y = promotionRank side then
-                    let promoted = Some { Piece = Queen; Side = side }
+                    let piece = promotionPiece |> Option.defaultValue Queen
+                    let promoted = Some { Piece = piece; Side = side }
                     Some (setPieceAt newBoard target promoted)
                 else
                     Some newBoard
